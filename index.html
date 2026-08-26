@@ -690,17 +690,18 @@ section{padding:88px 0;position:relative;z-index:1}
   animation:none;
   z-index:0;
 }
-/* 폰에서는 사진 대신 CSS 그라데이션 (모바일은 화면이 길어서 사진이 확대됨) */
+/* 폰·좁은 화면 — 섹션마다 배경을 깔아 확대 없이 보이게 */
 @media (max-width:900px){
   .temple-bg.has-marble{background-image:none;background-attachment:scroll}
-  .temple-bg.has-marble::before{
-    background-color:transparent;
+  .temple-bg.has-marble > section{
     background-image:
-      radial-gradient(1.6px 1.6px at 12% 14%, rgba(176,138,62,.5), transparent),
-      radial-gradient(1.4px 1.4px at 68% 52%, rgba(198,162,92,.48), transparent),
-      radial-gradient(1.2px 1.2px at 34% 88%, rgba(198,162,92,.42), transparent);
-    background-size:420px 420px;
+      linear-gradient(rgba(255,251,242,.52),rgba(255,251,242,.52)),
+      url("img/marble-bg.jpg");
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
   }
+  .temple-bg.has-marble::before{display:none}
 }
 /* 모래 사진은 잠시 꺼둠 — 쓰려면 아래 두 줄의 주석을 풀고
    <div class="temple-bg"> 에 has-sand 클래스를 다시 붙이세요 */
