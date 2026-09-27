@@ -1665,8 +1665,16 @@ footer .fcopy{
 
 <script>
 /* ═══════════════════════════════════════════════════
-   시세 데이터 — 이 부분만 바꾸면 사이트 전체가 바뀝니다
-   나중에 텔레그램 연동 시 이 객체를 서버에서 받아오게 됩니다
+   시세 데이터
+
+   🔴 2026-09-27 부터 시세는 장부에서 고칩니다
+      KH장부 → 메뉴 → 설정 → 「홈페이지 시세」 에서 숫자를 고치고 「저장」.
+      손님이 이 페이지를 열 때마다 저장된 값을 받아옵니다 (아래 loadRates).
+      이 파일을 다시 올릴 필요가 없습니다.
+
+   🔴 아래 RATES 는 「못 받아왔을 때 보여줄 값」 입니다 (예비)
+      인터넷이 느리거나 장부 쪽이 잠깐 안 될 때도 손님 화면이 비지 않게 둡니다.
+      평소엔 이 숫자가 화면에 뜨지 않으니, 굳이 맞춰 고치지 않아도 됩니다.
    ═══════════════════════════════════════════════════ */
 const RATES = {
   updated: "2026.08.26",
@@ -1786,15 +1794,46 @@ document.addEventListener("click", (e) => {
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeCat(); });
 
 /* ═══════════════════════════════════════════════════
-   ▼ 나중에 텔레그램 연동할 때 여기를 켜면 됩니다
-   ═══════════════════════════════════════════════════
-   fetch("https://<프로젝트>.supabase.co/rest/v1/site_rates?select=data&limit=1", {
-     headers: { apikey: "<anon key>" }
-   })
-     .then(r => r.json())
-     .then(([row]) => row && renderRates(row.data))
-     .catch(() => {});    // 실패해도 위의 기본 시세가 그대로 보임
+   장부에서 고친 시세 받아오기 (2026-09-27)
+
+   KH장부 「홈페이지 시세」 화면에서 저장하면 site_rates 한 줄이 바뀌고,
+   손님이 이 페이지를 열 때 그 값을 받아 위의 예비 시세를 덮어 그립니다.
+
+   🔴 열쇠는 공개용(publishable)입니다 — 이 열쇠로 읽히는 것은 site_rates 한 표뿐입니다.
+      매출·손님·원가·직원은 로그인해야만 읽힙니다 (SQL 103 이 그것을 검산합니다).
+      비밀 열쇠(sb_secret_…)는 이 파일에 절대 넣지 않습니다.
+
+   🔴 못 받아와도 화면이 비지 않습니다 — 위의 RATES 가 그대로 남습니다.
+      모양이 이상한 값이 와도 그립니다 안 그립니다 (아래 looksOk).
    ═══════════════════════════════════════════════════ */
+const SUPA_URL = "https://odbwpyiavenrwfsjsppk.supabase.co";
+const SUPA_KEY = "sb_publishable_vfQOB-gVznQAHNHswDy_jg_-CK6ATiZ";
+
+/* 받아온 값이 그릴 수 있는 모양인가 — 반쪽짜리면 예비 시세를 그대로 둔다 */
+function looksOk(d){
+  if (!d || typeof d !== "object") return false;
+  if (!d.hero || typeof d.hero !== "object") return false;
+  for (const k of ["gold","k18","k14","pt","ag"]) if (typeof d.hero[k] !== "number") return false;
+  if (!Array.isArray(d.live) || d.live.length === 0) return false;
+  if (!Array.isArray(d.buy)  || d.buy.length  === 0) return false;
+  return true;
+}
+
+async function loadRates(){
+  try {
+    const r = await fetch(
+      SUPA_URL + "/rest/v1/site_rates?select=data&id=eq.1&limit=1",
+      { headers: { apikey: SUPA_KEY, Authorization: "Bearer " + SUPA_KEY }, cache: "no-store" }
+    );
+    if (!r.ok) return;                       /* 예비 시세 그대로 */
+    const rows = await r.json();
+    const d = Array.isArray(rows) && rows[0] && rows[0].data;
+    if (looksOk(d)) renderRates(d);
+  } catch (e) {
+    /* 인터넷이 끊겨도 손님 화면은 예비 시세로 그대로 보인다 */
+  }
+}
+loadRates();
 </script>
 
 </body>
