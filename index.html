@@ -345,7 +345,9 @@ nav a:hover::after{transform:scaleX(1)}
   grid-template-columns:1fr;
   width:100%;padding-top:40px;padding-bottom:40px;
 }
-.hero.has-bg .eclipse{margin-bottom:20px}
+/* 🔴 여기 있던 `.hero.has-bg .eclipse{margin-bottom:20px}` 는 지웠습니다 —
+   2026-09-27 에 .eclipse(일식 안 시세판)가 이 파일에서 통째로 없어졌습니다.
+   (이 .hero.has-bg 묶음 자체도 has-bg 클래스를 붙이는 곳이 없어 안 쓰입니다.) */
 .hero.has-bg .hero-eyebrow{
   color:#8A6A24;font-weight:600;
   text-shadow:0 1px 12px rgba(255,252,244,1), 0 0 5px rgba(255,252,244,1);
@@ -427,131 +429,54 @@ nav a:hover::after{transform:scaleX(1)}
     0 3px 12px rgba(60,44,16,.30);
 }
 
-/* 시세가 앉는 자리 — 배경 일식 링 안쪽 */
-.eclipse{
-  position:relative;
-  width:clamp(320px,54vw,640px);
-  aspect-ratio:1;
-  display:flex;align-items:center;justify-content:center;
-  margin-bottom:18px;
+/* ═══ 히어로 안 시세표 — 「내가 살 때 / 내가 팔 때」 6줄 ═══
+   🔴 2026-09-27 — 맨 위 「오늘의 시세」 큰 숫자 다섯과 가운데 「실시간 금시세」 절이 같은 값을
+      두 번 보여주고 있었습니다. 사장님 말씀대로 하나로 합쳤습니다 :
+      「맨 위 오늘의 시세 자리에 살 때/팔 때 표를 그대로 올려 하나로 합친다」.
+   🔴 일식 그림은 CSS 가 아니라 .hero 의 background-image(img/hero-bg.jpg)입니다 —
+      그래서 표만 갈아도 일식은 뒤에 그대로 남습니다. 옛 .eclipse · .disc · .rates 계열
+      CSS(여기 있던 125줄)는 쓰는 곳이 하나도 없어져서 지웠습니다.
+   🔴 액자·머리띠·줄 모양은 아래 .big-rates / .br-head / .br-row / .br-cell 를 그대로
+      물려씁니다. 그 규칙을 여기 베끼지 않습니다 — 베끼면 한쪽만 고쳐져서 위 표와
+      아래 「제품별 매입시세」 표 생김새가 어긋납니다 (액자 CSS 가 이미 네 곳에 복제돼 있습니다). */
+.hero-rates{
+  /* 🔴 min() 의 calc(100vw - 176px) 은 오른쪽에 붙어 다니는 동그란 버튼(.floaty)을 피하는 폭입니다.
+     .floaty 는 화면 오른쪽 끝에서 80px 안쪽부터 시작하므로, 가운데 정렬을 지키면서 피하려면
+     양쪽으로 80+여백 8 씩을 비워야 합니다(2×88=176).
+     이 한 줄이 없으면 761~879px(태블릿 세로)에서 버튼이 「내가 팔 때」 칸을 덮습니다. */
+  width:min(100%, calc(100vw - 176px), 720px);
+  margin:4px auto 16px;
+  /* 헤더가 sticky 118px 이라 그만큼 비켜 세워야 #rates 로 뛰었을 때 표 머리글이 헤더 밑에 숨지 않습니다 */
+  scroll-margin-top:124px;
 }
-/* 배경 사진에 링이 있으므로 CSS 링·광채는 끔 */
-.eclipse::before,.eclipse::after{display:none}
-/* 코로나 광채 */
-.eclipse::before{
-  content:"";position:absolute;inset:-14%;
-  border-radius:50%;
-  background:radial-gradient(circle,
-    rgba(214,184,113,.42) 40%,
-    rgba(214,184,113,.20) 56%,
-    rgba(214,184,113,.06) 70%,
-    transparent 80%);
-  animation:breathe 7s ease-in-out infinite;
-}
-@keyframes breathe{
-  0%,100%{transform:scale(1);opacity:1}
-  50%{transform:scale(1.055);opacity:.82}
-}
-/* 골드 링 */
-.eclipse::after{
-  content:"";position:absolute;inset:0;
-  border-radius:50%;
-  background:conic-gradient(from 210deg,
-    var(--gold-light), var(--gold), #E8D9A8, var(--gold), var(--gold-light));
-  padding:3px;
-  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite:xor;mask-composite:exclude;
-}
-/* ── 일식 이미지 (img/eclipse.png) ──
-   파일이 없으면 자동으로 CSS 링 버전으로 되돌아갑니다 */
-.eclipse-img{
-  display:none;
-  position:absolute;inset:0;z-index:1;
-  width:100%;height:100%;max-width:none;
-  object-fit:cover;object-position:center 50%;
-  transform:scale(1.16);         /* 링 크기 — 키우려면 숫자 올리기 */
-  -webkit-mask:radial-gradient(circle closest-side at 50% 50%,
-    #000 50%, rgba(0,0,0,.55) 72%, rgba(0,0,0,.16) 86%, transparent 96%);
-  mask:radial-gradient(circle closest-side at 50% 50%,
-    #000 50%, rgba(0,0,0,.55) 72%, rgba(0,0,0,.16) 86%, transparent 96%);
-  pointer-events:none;
-}
-.eclipse.has-img .eclipse-img{display:block}
-/* 이미지 쓸 때는 CSS 링·광채·원반 숨김 */
-.eclipse.has-img::before,
-.eclipse.has-img::after{display:none}
-/* 이미지 쓸 때는 흰 원반 없앰 — 일식 자체가 배경 역할 */
-.eclipse.has-img .disc{display:none}
-.eclipse.has-img .rates{width:78%;transform:translateY(0)}
-
-/* 원반이 없으므로 글자마다 광채를 둘러 가독성 확보 */
-.eclipse.has-img .rates-head,
-.eclipse.has-img .rates-foot,
-.eclipse.has-img .rate .n,
-.eclipse.has-img .rate .v{
-  text-shadow:
-    0 0 4px rgba(255,253,247,1),
-    0 0 10px rgba(255,253,247,1),
-    0 0 22px rgba(255,253,247,.98),
-    0 0 38px rgba(255,251,240,.9),
-    0 1px 2px rgba(255,253,247,1);
-}
-.eclipse.has-img .rate{
-  border-bottom-color:rgba(150,116,46,.34);
-  box-shadow:0 1px 0 rgba(255,253,247,.6);
-}
-/* 일식 이미지에 독수리가 같이 들어있으면
-   아래 한 줄의 주석을 풀어서 SVG 독수리를 숨기세요
-   (링만 있는 일식 이미지로 바꾸면 그대로 두시면 됩니다) */
-
-
-/* 일식 안쪽 발광 원반 — 시세 가독성 */
-.eclipse .disc{
-  position:absolute;inset:4%;border-radius:50%;z-index:2;
-  background:radial-gradient(circle,
-    rgba(255,253,247,.94) 0%,
-    rgba(255,251,241,.88) 48%,
-    rgba(253,244,226,.62) 72%,
-    rgba(253,244,226,.16) 88%,
-    transparent 97%);
-  box-shadow:0 0 46px rgba(255,250,238,.7);
-}
-
-/* 시세판 (일식 안) */
-.rates{
-  position:relative;z-index:3;
-  width:78%;
-  display:flex;flex-direction:column;
-  gap:1px;
-}
-.rates-head{
+/* 🔴 머리글에 「실시간 금시세」 를 같이 담았습니다 — 가운데 절을 지우면 그 글자가 페이지에서
+   통째로 사라집니다. 손님이 검색으로 찾아오는 말이라 남겨야 합니다.
+   사장님이 알던 「오늘의 시세」 도 같이 남깁니다. */
+.hero-rates-head{
   font-family:var(--font-ui);
-  font-size:clamp(14px,1.75vw,20px);letter-spacing:.06em;
-  color:#7A5A12;font-weight:900;text-align:center;margin-bottom:15px;
+  font-size:clamp(13px,1.6vw,19px);letter-spacing:.04em;
+  color:#7A5A12;font-weight:900;text-align:center;padding:11px 8px 12px;
 }
-.rate{
-  display:grid;grid-template-columns:1fr auto;
-  align-items:baseline;gap:8px;
-  padding:5px 0;
-  border-bottom:1px solid rgba(160,126,58,.30);
-}
-.rate:last-of-type{border-bottom:0}
-.rate .n{
-  font-family:var(--font-ui);
-  font-size:clamp(17px,2.5vw,26px);font-weight:900;
-  color:#000;letter-spacing:-.02em;
-}
-.rate .v{
+/* 🔴 UPDATED 한 줄이 「지금 받아온 진짜 시세」 와 「파일에 박힌 예비 시세」 를 가릴 유일한 단서입니다
+   (loadRates 의 catch 는 로그도 안 남깁니다). 더 줄이거나 다른 글자 속에 묻지 마세요. */
+.hero-rates-foot{
   font-family:"Montserrat",sans-serif;
-  font-size:clamp(19px,3.1vw,33px);font-weight:700;
-  color:#000;letter-spacing:-.02em;
+  font-size:clamp(10.5px,1.1vw,12.5px);letter-spacing:.08em;
+  color:#3A3226;font-weight:700;text-align:center;padding:11px 8px 4px;
 }
-.rate .v small{font-size:.62em;color:#3A3226;font-weight:600;margin-left:2px}
-.rates-foot{
-  font-family:"Montserrat",sans-serif;
-  font-size:clamp(11px,1.15vw,13px);letter-spacing:.12em;color:#3A3226;font-weight:700;
-  text-align:center;margin-top:13px;
+/* 🔴 ※ 주의문을 액자 밖 `.note` 로 두지 않는 까닭 : .note 는 그림자가 없어 신전 사진 위에서
+   안 읽히고, `.note{margin-top:16px}` 이 이 파일 아래쪽에 있어 특정도가 같으면 그것이 이깁니다.
+   그래서 액자 **안**에 .hero-rates-note 로 넣었습니다 (사진 위에 직접 뜨는 글자를 하나도 두지 않습니다). */
+.hero-rates-note{
+  font-size:clamp(11px,1.1vw,13px);color:#5A4C34;text-align:center;
+  line-height:1.8;margin:0;padding:0 8px 6px;
 }
+/* 🔴 minmax(0,…) 를 세 번 씁니다. fr 트랙의 최소값은 auto(=min-content)라서, 글꼴을 키운 손님
+   (사파리 aA · 안드로이드 「글꼴 크게 150%」)에게는 표가 카드를 넘칩니다. 카드는 .hero{overflow:hidden}
+   안이고 가로 스크롤도 없어서, 넘친 오른쪽 「내가 팔 때」 칸이 스크롤바도 없이 통째로 안 보입니다.
+   금은방 손님 나이대에 아주 흔한 설정입니다. */
+.hero-rates .br-head,
+.hero-rates .br-row{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr) minmax(0,1fr)}
 
 /* 슬로건 — 양옆 금선으로 감싸기 */
 .hero-tag{
@@ -1161,21 +1086,18 @@ footer .fcopy{
   .navtoggle{display:block;margin-left:auto}
   .brand{margin-left:0}
   header .btn-call{display:none}
-  /* ── 폰: 일식 시세판이 화면을 꽉 채우게 ── */
+  /* ── 폰: 시세표가 첫 화면을 꽉 채우게 ── */
   .hero{
-    padding:30px 0 52px;
-    min-height:86vh;
+    padding:22px 0 34px;
+    /* 🔴 min-height 는 이 블록에서 고쳐야 합니다 — 위에 새 줄을 더하면 뒤에 오는 이 줄이 이깁니다.
+       svh 는 주소창을 뺀 진짜 높이라 폰에서 표가 잘리지 않습니다. */
+    min-height:100svh;
     background-position:center 46%;
   }
-  .eclipse{width:min(92vw,460px);margin-bottom:0}
-  .eclipse.has-img .rates{width:84%}
-  .rate{padding:6px 0}
-  .rate .n{font-size:17px}
-  .rate .v{font-size:22px}
-  .rates-head{font-size:15px;margin-bottom:10px}
   .hero-title{font-size:clamp(30px,8.6vw,46px);margin-bottom:5px}
   .hero-kr{margin-bottom:14px;letter-spacing:.26em;font-size:10.5px}
-  .hero-inner{grid-template-columns:1fr;gap:0}
+  /* 🔴 좌우 여백을 20 → 10px 로 줄여 표 폭을 벌었습니다 (기본 규칙이 아니라 여기서 고칩니다) */
+  .hero-inner{grid-template-columns:1fr;gap:0;padding:0 10px}
   .column{
     position:absolute;top:0;bottom:0;
     --w:clamp(34px,11vw,58px);
@@ -1183,7 +1105,47 @@ footer .fcopy{
   }
   .column.left{left:0}
   .column.right{right:0}
-  .eclipse-wrap{padding:0 8px}
+  /* 🔴 원래 `padding:0 8px` 이었습니다. 위에 새 줄을 더해 덮으려 하면 같은 미디어쿼리 안에서
+     뒤에 오는 이 줄이 이기므로, 반드시 **이 자리에서** 0 으로 고칩니다.
+     8px 을 남겨 두면 표 폭이 355 대신 319px 이 되어 숫자 크기 계산이 전부 좁은 쪽으로 밀립니다. */
+  .eclipse-wrap{padding:0}
+
+  /* ── 폰 시세표 조율 ──
+     🔴 모든 줄에 `.hero-rates` 접두어를 붙입니다. 안 붙이면 기본 `.hero-rates .br-cell`(특정도 0,2,0)이
+        이겨서 이 줄들이 통째로 죽은 규칙이 됩니다 (미디어쿼리는 특정도를 올려주지 않습니다).
+
+     🔴🔴 오른쪽 고정 버튼 이야기 — 이 개편이 만든 문제가 아니라 지금도 일어나던 일입니다.
+        .floaty(당근·카카오·인스타·전화·맨위로)는 폰에서 right:14px · 50px 짜리라
+        화면 오른쪽 64px 을 늘 차지하고, 실측으로 442,000 · 180,000 · 3,050,000 세 줄의
+        끝자리를 가리고 있었습니다. 표를 맨 위로 올리면 하필 제일 중요한 칸(우리 매입가)
+        여섯 줄이 가려집니다.
+        → 표를 오른쪽에서 64px 비켜 세워 버튼을 피하게 했습니다.
+        🔴 버튼을 숨기지 않았습니다 — 당근·카카오 문의가 줄면 그대로 매출이라서,
+           사장님께 여쭙기 전에 저희가 정하지 않습니다. 대가는 숫자가 한 단 작아지는 것입니다. */
+  .hero-rates{align-self:stretch;width:auto;margin:4px 64px 16px 0}
+  .hero-rates-head{font-size:13.5px;padding:9px 6px 10px}
+  .hero-rates-foot{font-size:10.5px;padding:9px 6px 3px}
+  .hero-rates-note{font-size:11px;padding:0 6px 4px}
+  .hero-rates.big-rates{padding:6px}
+  /* 🔴 ::after{inset:5px} 를 그대로 두면 금선과 짙은 머리띠가 1px 로 붙어 액자로 안 보입니다 */
+  .hero-rates.big-rates::after{inset:3px}
+  /* 🔴 「내가 살 때 / 내가 팔 때」 는 한 글자(살·팔)만 다르고 그 한 글자에 표의 뜻 전체가 걸려 있습니다.
+     그래서 글자 크기를 내리지 않고, letter-spacing 을 .2em 에서 .06em 으로 줄여 폭을 벌었습니다. */
+  .hero-rates .br-head > div{padding:9px 5px;font-size:10.5px;letter-spacing:.06em}
+  .hero-rates .br-name{padding:10px 7px;font-size:clamp(12px,3.3vw,16px)}
+  /* 🔴 .br-name small{display:block} 때문에 이름 칸은 「골드바 (9999)」 + 「1돈」 두 줄입니다 —
+     한 줄 높이가 45px 쯤이고 6줄이면 270px 입니다. 이 값을 안 세면 첫 화면 높이 계산이 틀어집니다. */
+  .hero-rates .br-name small{margin-top:1px;font-size:.66em}
+  .hero-rates .br-cell{padding:10px 5px}
+  /* 🔴 기준 글자는 은 시세 「3,650,000」 입니다 (Montserrat 에서 폭 ≈ 글자크기 × 5.13).
+     표가 64px 좁아진 만큼 숫자도 한 단 내려야 칸을 안 넘습니다.
+     clamp + calc 로 320~560px 사이가 이어져서 420/421px 경계에서 숫자가 툭 튀지 않습니다
+     (아이폰 12~16 Pro Max 는 428·430·440px 입니다).
+     🔴 넘칠 때 잘리는 게 아니라 줄어들게 두는 까닭 : 은 시세가 여덟 자리가 되는 날
+        숫자가 잘려 손님이 자릿수를 오독하면 그 자리에서 분쟁이 됩니다. */
+  .hero-rates .br-cell .p{font-size:clamp(11px,calc(6vw - 8px),22px)}
+  .hero-rates .br-cell .p.txt{font-size:11px}
+  .hero-rates .br-cell .d{font-size:9.5px}
   section{padding:62px 0}
   body{padding-bottom:62px}
   .callbar{
@@ -1199,11 +1161,179 @@ footer .fcopy{
   .callbar a.gold{background:var(--gold);color:var(--white)}
   .topbar .hours{display:none}
 }
-@media (max-width:420px){
-  .eclipse.has-img .rates{width:86%}
-  .rate .n{font-size:15.5px}
-  .rate .v{font-size:20px}
+
+/* ═══════════════════════════════════════════════════
+   제품 갤러리 — 화면을 덮는 한 덩이 (2026-09-27)
+
+   사장님 말씀 : 「제품 카드 = 사진 + 이름 + 가격문의 · 가격은 절대 안 적는다」
+                「보여줄 제품 = 장부 상품관리에 살아있는 제품 전부」
+
+   🔴 화면을 통째로 덮습니다(position:fixed · inset:0 · 불투명 배경). 절을 하나씩 숨기는
+      방식으로 만들지 않은 까닭 : 숨길 절을 세다가 하나만 빠뜨리면 갤러리 화면 카드 바로 아래에
+      「제품별 매입시세」 표가 그대로 남아, 사장님이 못 박은 「가격은 절대 안 적는다」 가 그 자리에서 깨집니다.
+   🔴 이름은 전부 .gal… 로 새로 씁니다 — 액자 CSS 가 네 곳(.big-rates · .table-card ·
+      .visit-card · .grid4)에 복제돼 있어서, 물려쓰면 한 곳 고칠 때 표 생김새가 어긋납니다.
+   ═══════════════════════════════════════════════════ */
+html.gal-open,html.gal-open body{overflow:hidden}
+.gal{
+  /* z 200 — 이 파일에서 제일 높은 것이 .floaty 90 이라 헤더(60)·왼쪽 메뉴(70)·
+     하단 통화바(80)·동그란 버튼(90)을 모두 덮습니다 */
+  position:fixed;inset:0;z-index:200;
+  overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
+  background:var(--cream);
 }
+.gal[hidden]{display:none}
+.galbar{
+  position:sticky;top:0;z-index:2;
+  display:flex;align-items:center;gap:12px;height:56px;padding:0 16px;
+  background:rgba(251,244,231,.94);backdrop-filter:blur(6px);
+  border-bottom:1px solid var(--line);
+}
+.galback{
+  width:44px;height:44px;flex:0 0 auto;line-height:1;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;color:#2A2013;
+  background:#FFFDF6;border:1px solid rgba(168,134,66,.55);border-radius:3px;
+}
+/* 🔴 제목은 반드시 한 줄입니다. 「18K · 14K 쥬얼리 · 목걸이」 처럼 긴 제목이 320px 폰
+   (아이폰 SE 1세대 · 글자를 키운 손님)에서 두 줄이 되면, 바 높이가 56px 로 박혀 있어
+   두 번째 줄이 바 밖으로 삐져나와 바로 아래 종목 단추 띠(.galtabs · top:56px 로 붙어 있음)와
+   겹칩니다. 실측으로 320px 에서 제목 63px · 바 56px 이었습니다.
+   바를 늘려서 풀 수는 없습니다 — .galtabs 가 top:56px 라는 고정값으로 붙어 있어
+   바만 키우면 이번엔 단추 띠가 바 아래쪽을 영영 덮습니다.
+   그래서 제목을 한 줄로 못 박고 넘치면 … 로 줄입니다. 종목 이름은 바로 아래 단추에
+   그대로 다 적혀 있고 고른 것이 짙게 칠해지므로, 줄여도 손님이 잃는 정보가 없습니다.
+   🔴 min-width:0 이 꼭 있어야 합니다 — 이 칸은 flex 자식이라 기본 최소폭이 min-content 이고,
+      그것이 없으면 overflow:hidden 을 적어도 안 줄어듭니다. */
+.galttl{
+  font-family:"Noto Serif KR",serif;font-size:18px;font-weight:900;
+  color:#000;letter-spacing:-.01em;
+  min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+/* 🔴 덮개가 하단 통화바(z 80)를 가리므로 전화 길을 덮개 안에 따로 둡니다 */
+.galtel{
+  margin-left:auto;white-space:nowrap;
+  background:#332918;color:var(--gold-light);
+  font-family:var(--font-ui);font-size:13px;font-weight:800;
+  padding:9px 14px;border-radius:3px;
+}
+.galtabs{
+  position:sticky;top:56px;z-index:2;
+  display:flex;gap:6px;padding:10px 16px;
+  background:rgba(251,244,231,.94);backdrop-filter:blur(6px);
+}
+.galtabs button{
+  flex:1;padding:10px 4px;cursor:pointer;
+  font-family:var(--font-ui);font-size:13px;font-weight:800;letter-spacing:-.02em;
+  color:#2A2013;background:#FFFDF6;
+  border:1px solid rgba(168,134,66,.45);border-radius:3px;
+  /* 🔴 종목 이름을 한 줄로 (2026-09-27) — 폰 375px 에서 「18K · 14K 쥬얼리」 가
+     「…쥬얼 / 리」 로 잘려 가게가 허술해 보였습니다.
+     세 칸이 화면을 정확히 나눠 갖는 자리(flex:1)라 글자가 길어지면 무조건 줄이 바뀌므로,
+     줄바꿈을 막고 대신 그 칸에서만 글자를 조금 좁힙니다(clamp).
+     🔴 min-width:0 이 꼭 있어야 합니다 — flex 자식의 기본 최소폭이 min-content 라
+     그것이 없으면 nowrap 글자가 칸을 밀어내 세 단추가 화면 밖으로 넘칩니다. */
+  white-space:nowrap;min-width:0;
+  font-size:clamp(10.5px, 3.1vw, 13px);
+}
+.galtabs button.on{background:#332918;color:var(--gold-light);border-color:#332918}
+/* 아직 제품을 못 받아왔을 때는 단추가 하나도 없으므로 빈 띠가 남지 않게 접습니다 */
+.galtabs:empty{display:none}
+.galkinds{max-width:1140px;margin:0 auto;padding:0 16px}
+.galkinds[hidden]{display:none}
+.galkinds .kh{
+  width:100%;text-align:left;cursor:pointer;padding:11px 13px;
+  font-family:var(--font-ui);font-size:14px;font-weight:800;color:#2A2013;
+  background:#FFFDF6;border:1px solid rgba(168,134,66,.45);border-radius:3px;
+}
+.galkinds .kl{display:none;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px}
+.galkinds.open .kl{display:grid}
+.galkinds .kl button{
+  padding:10px 4px;cursor:pointer;
+  font-family:var(--font-ui);font-size:13px;font-weight:700;color:#2A2013;
+  background:#FFFDF6;border:1px solid rgba(168,134,66,.38);border-radius:3px;
+}
+.galkinds .kl button.on{background:#F3E7D0;border-color:var(--gold);color:#7A5A12;font-weight:900}
+/* 넓은 화면에서는 아코디언을 접지 않고 여섯 칸을 늘 펴 둡니다 */
+@media (min-width:760px){
+  .galkinds .kh{display:none}
+  .galkinds .kl{display:grid;grid-template-columns:repeat(6,1fr)}
+}
+.galgrid{
+  display:grid;gap:10px;grid-template-columns:repeat(2,1fr);
+  max-width:1140px;margin:0 auto;padding:12px 16px 28px;
+}
+@media (min-width:560px){.galgrid{grid-template-columns:repeat(3,1fr)}}
+@media (min-width:900px){.galgrid{grid-template-columns:repeat(4,1fr);gap:14px}}
+.galmsg{
+  grid-column:1/-1;text-align:center;padding:48px 12px;
+  font-family:var(--font-ui);font-size:15px;font-weight:700;color:#5A4C34;line-height:2;
+}
+.galmsg a{color:#8A6113;font-weight:800}
+.galmsg button{
+  display:inline-block;margin-top:12px;padding:10px 18px;cursor:pointer;
+  font-family:var(--font-ui);font-size:13px;font-weight:800;color:#7A5A12;
+  background:#FFFDF6;border:1px solid rgba(168,134,66,.55);border-radius:3px;
+}
+.galsep{
+  grid-column:1/-1;margin:10px 0 2px;padding-top:12px;
+  border-top:1px solid rgba(168,134,66,.34);
+  font-family:var(--font-ui);font-size:12px;font-weight:700;color:#8A7355;text-align:center;
+}
+/* 맨 앞에 오는 안내 한 줄(「골드바는 준비 중입니다」)에는 위 금선이 어색하므로 뺍니다 */
+.galsep:first-child{border-top:0;margin-top:0;padding-top:0}
+.gcard{display:flex;flex-direction:column;background:var(--white);border:1px solid rgba(168,134,66,.45)}
+.gph{position:relative;aspect-ratio:1/1;overflow:hidden;background:#FFFDF6}
+/* 🔴 cover 가 아니라 contain 입니다 — 목걸이·팔찌 사진은 세로가 길어서 cover 면 펜던트·잠금쇠가 잘립니다.
+   손님 눈에 잘린 사진은 없는 사진보다 나쁩니다(가게가 성의 없어 보입니다). 정사각 액자는 그대로 유지됩니다. */
+.gph img{width:100%;height:100%;object-fit:contain;display:block}
+.gk{
+  position:absolute;left:8px;top:8px;z-index:2;
+  background:rgba(51,41,24,.88);color:var(--gold-light);
+  font-family:"Montserrat",sans-serif;font-size:10px;letter-spacing:.14em;padding:3px 7px;
+}
+/* 🔴 종류를 한국어로 적습니다 — 이름이 「클로버」 「V라인」 이면 손님이 반지인지 목걸이인지 알 길이 없습니다 */
+.gkind{padding:8px 10px 0;font-family:var(--font-ui);font-size:11px;font-weight:700;color:#8A6A24}
+.gnm{
+  padding:4px 10px 0;font-family:var(--font-ui);
+  font-size:14px;font-weight:800;line-height:1.35;color:#000;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+  overflow:hidden;min-height:2.7em;
+}
+/* 🔴 「가격문의」 는 글자 배지입니다 — tel: 링크로 만들지 않습니다.
+   카드 수백 개를 넘기다 손가락이 스치면 잘못 걸리고, PC 에서는 눌러도 아무 일이 없어 보입니다.
+   전화 길은 위 .galtel 과 격자 아래 번호에 있습니다. */
+.gask{
+  display:block;margin:8px 10px 10px;padding:8px;text-align:center;
+  font-family:var(--font-ui);font-size:12px;font-weight:800;color:#7A5A12;
+  border:1px solid rgba(168,134,66,.55);
+}
+/* ── 사진이 없을 때 — 사장님 말씀대로 회색. 그림 파일을 늘리지 않고 CSS 로만 그립니다 ── */
+.gcard.nophoto .gph{background:#EDE7DC}
+.gcard.nophoto .gph::before{
+  content:"";position:absolute;left:50%;top:44%;width:34px;height:34px;
+  transform:translate(-50%,-50%) rotate(45deg);
+  border:1.5px solid rgba(160,126,58,.45);
+}
+.gcard.nophoto .gph::after{
+  content:"사진 준비중";position:absolute;left:0;right:0;bottom:12px;text-align:center;
+  font-family:var(--font-ui);font-size:11px;font-weight:800;color:#8A7355;
+}
+/* 🔴 사진 주소가 살아있지만 그림이 깨진 경우(onerror 로 nophoto 를 붙인 경우)
+   깨진 그림 아이콘이 회색 액자 위에 남지 않게 */
+.gcard.nophoto .gph img{display:none}
+.galmore{
+  display:block;width:calc(100% - 32px);max-width:420px;margin:0 auto 22px;
+  padding:14px;cursor:pointer;
+  font-family:var(--font-ui);font-size:14px;font-weight:800;color:#2A2013;
+  background:#FFFDF6;border:1px solid rgba(168,134,66,.55);border-radius:3px;
+}
+.galmore[hidden]{display:none}
+.galnote{
+  max-width:1140px;margin:0 auto;padding:0 16px 40px;
+  font-size:13px;color:#5A4C34;text-align:center;line-height:1.95;
+}
+.galnote a{color:#8A6113;font-weight:800}
 </style>
 </head>
 <body>
@@ -1228,7 +1358,13 @@ footer .fcopy{
       <div class="catpanel" id="catpanel">
         <div class="cathead">Collections</div>
 
-        <a href="#rates">
+
+        <!-- 🔴 2026-09-27 — 누르면 제품 갤러리(화면을 덮는 덩이)가 열립니다.
+             원래 다섯 줄이 전부 #rates(시세표)를 가리키고 있었습니다.
+             「실버바」·「실버 쥬얼리」 두 줄은 지웠습니다 — 장부 상품관리의 함량이
+             24K·18K·14K 뿐이어서 보여드릴 실버 제품이 아예 없습니다.
+             🔴 주소(#gallery-…)는 아래 갤러리 script 의 정규식과 한 글자도 같아야 합니다. -->
+        <a href="#gallery-goldbar">
           <span class="catthumb">
             <img src="img/menu-goldbar.jpg" alt="" onerror="this.remove()">
             <span class="dot"></span>
@@ -1239,18 +1375,7 @@ footer .fcopy{
           </span>
         </a>
 
-        <a href="#rates">
-          <span class="catthumb">
-            <img src="img/menu-silverbar.jpg" alt="" onerror="this.remove()">
-            <span class="dot silver"></span>
-          </span>
-          <span class="cattxt">
-            <span class="nm">실버바</span>
-            <span class="sub">999 · 9999 · 1kg</span>
-          </span>
-        </a>
-
-        <a href="#rates">
+        <a href="#gallery-puregold">
           <span class="catthumb">
             <img src="img/menu-gold-jewelry.jpg" alt="" onerror="this.remove()">
             <span class="dot"></span>
@@ -1261,7 +1386,7 @@ footer .fcopy{
           </span>
         </a>
 
-        <a href="#rates">
+        <a href="#gallery-karat">
           <span class="catthumb">
             <img src="img/menu-karat-jewelry.jpg" alt="" onerror="this.remove()">
             <span class="dot"></span>
@@ -1269,17 +1394,6 @@ footer .fcopy{
           <span class="cattxt">
             <span class="nm">18K · 14K 쥬얼리</span>
             <span class="sub">주문 제작 가능</span>
-          </span>
-        </a>
-
-        <a href="#rates">
-          <span class="catthumb">
-            <img src="img/menu-silver-jewelry.jpg" alt="" onerror="this.remove()">
-            <span class="dot silver"></span>
-          </span>
-          <span class="cattxt">
-            <span class="nm">실버 쥬얼리</span>
-            <span class="sub">925 실버</span>
           </span>
         </a>
       </div>
@@ -1324,18 +1438,22 @@ footer .fcopy{
       <h1 class="hero-title">리턴 금거래소</h1>
       <div class="hero-kr">Return Gold Exchange</div>
 
-      <!-- 일식 + 시세 -->
-      <div class="eclipse has-img" id="eclipse">
-        <div class="disc" aria-hidden="true"></div>
-        <div class="rates">
-          <div class="rates-head">오늘의 시세 · 1돈</div>
-          <div class="rate"><span class="n">순금 24K</span><span class="v" id="r-gold">—</span></div>
-          <div class="rate"><span class="n">18K</span><span class="v" id="r-18k">—</span></div>
-          <div class="rate"><span class="n">14K</span><span class="v" id="r-14k">—</span></div>
-          <div class="rate"><span class="n">백금 Pt</span><span class="v" id="r-pt">—</span></div>
-          <div class="rate"><span class="n">은 <small>1kg</small></span><span class="v" id="r-ag">—</span></div>
-          <div class="rates-foot" id="r-updated">UPDATED —</div>
+      <!-- 🔴 2026-09-27 — 여기 있던 「오늘의 시세 · 1돈」 큰 숫자 다섯(일식 안)을 없애고,
+           그 자리에 「내가 살 때 / 내가 팔 때」 6줄 표를 올렸습니다 (사장님 지시 · 같은 내용이
+           맨 위와 가운데에 두 번 나오던 것을 하나로 합쳤습니다).
+           🔴 id="rates" 를 이 카드가 물려받습니다 — 위 네비게이션 「시세」 · 폰 아래 고정 바 「시세」 가
+              그것을 가리키므로, 앵커가 없어지면 그 링크들이 그 자리에서 죽습니다.
+           🔴 #big-rates-body · #r-updated · #today-date 세 id 도 그대로 물려받아
+              renderRates 를 거의 안 고쳤습니다.
+           🔴 일식 그림은 이 카드 뒤 .hero 의 background-image 라 표를 갈아도 그대로 남습니다. -->
+      <div class="hero-rates big-rates" id="rates">
+        <div class="hero-rates-head">실시간 금시세 · 오늘의 시세 (1돈)</div>
+        <div class="br-head"><div>품목</div><div>내가 살 때</div><div>내가 팔 때</div></div>
+        <div id="big-rates-body"></div>
+        <div class="hero-rates-foot">
+          <span id="r-updated">UPDATED —</span> · 단위 1돈(3.75g) · <span id="today-date"></span>
         </div>
+        <p class="hero-rates-note">※ 시세는 국제 금시세에 따라 수시로 변동됩니다. 방문 전 전화로 확인해 주세요.</p>
       </div>
 
 
@@ -1364,28 +1482,11 @@ footer .fcopy{
   <!-- 배경 사진은 CSS(.temple-bg.has-marble)에서 처리합니다 -->
 
 
-<!-- ═══ 실시간 금시세 ═══ -->
-<section id="rates">
-  <div class="wrap">
-    <div class="sec-head">
-      <div class="eyebrow">Real-time Market</div>
-      <h2 class="sec-title">실시간 금시세</h2>
-      <p class="sec-sub">단위 : 1돈 (3.75g) · <span id="today-date"></span></p>
-    </div>
-
-    <div class="big-rates scroll-x">
-      <div class="br-head">
-        <div>품목</div><div>내가 살 때</div><div>내가 팔 때</div>
-      </div>
-      <div id="big-rates-body"></div>
-    </div>
-
-    <p class="note">
-      ※ 시세는 국제 금시세에 따라 수시로 변동됩니다. 방문 전 전화로 확인해 주세요.
-    </p>
-  </div>
-</section>
-
+<!-- 🔴 2026-09-27 — 「실시간 금시세」 절이 여기 있었습니다.
+     맨 위 히어로와 같은 값을 두 번 보여주던 것을 없애라는 사장님 지시로, 표를 히어로로 올리고
+     이 절을 통째로 지웠습니다. id="rates" 와 #big-rates-body · #today-date 는 히어로 카드가
+     물려받았으므로 위 네비게이션·아래 고정 바·왼쪽 메뉴 링크는 그대로 살아 있습니다.
+     아래 「제품별 매입시세」 절은 사장님 말씀대로 항목 그대로 다 나옵니다. -->
 <!-- ═══ 제품별 매입시세 ═══ -->
 <section class="sec-alt" id="buy-rates">
   <div class="wrap">
@@ -1658,7 +1759,7 @@ footer .fcopy{
 
 <!-- ═══ 모바일 하단 바 ═══ -->
 <div class="callbar">
-  <a href="#rates">시세 보기</a>
+  <a href="#rates">시세</a>
   <a href="#visit">오시는 길</a>
   <a href="tel:01090874988" class="gold">전화 상담</a>
 </div>
@@ -1679,7 +1780,12 @@ footer .fcopy{
 const RATES = {
   updated: "2026.08.26",
 
-  // 히어로 일식 안에 표시 (1돈 기준 매입가)
+  // 🔴 hero — 손님 화면에서는 이제 안 보입니다 (2026-09-27 에 큰 숫자 다섯 칸을 없앴습니다).
+  //    그래도 지웠다가 다시 만들면 안 됩니다 :
+  //    ① 장부가 보내는 자료와 DB 제약이 아직 이 다섯 키를 요구합니다
+  //    ② 아래 looksOk 가 이 다섯 값을 봅니다
+  //    ③ GitHub Pages 가 이 파일을 10분쯤 묵히므로, 그 사이 옛 파일을 받은 손님은
+  //       아직 큰 숫자 다섯 줄을 그립니다. 값이 위 표에서 파생된 것이라 숫자가 어긋나지 않습니다.
   hero: {
     gold: 770000,   // 순금 24K
     k18:  570000,   // 18K
@@ -1689,34 +1795,41 @@ const RATES = {
   },
 
   // 실시간 금시세 표 (내가 살 때 / 내가 팔 때 / 전일대비)
-  // sell 이 null 이면 "제품시세적용" 으로 표시됩니다
+  // 🔴 「내가」 는 손님입니다 — 내가 살 때 = 우리 판매가 · 내가 팔 때 = 우리 매입가
+  // 🔴 sell(내가 살 때)이 null 이거나 키가 없으면 "제품시세적용" 으로 나갑니다
+  // 🔴 줄 순서가 곧 화면 순서입니다 — 사장님 글 순서대로 골드바가 맨 위입니다
+  // 🔴 name 은 전일대비(▲▼) 짝 열쇠이기도 해서 DB 쪽 이름과 한 글자도 같아야 합니다
   live: [
-    { name:"24K 금시세",  unit:"1돈",  sell:780000,  sellD:+1000, buy:770000,  buyD:+2000 },
-    { name:"18K 금시세",  unit:"1돈",  sell:null,                 buy:570000,  buyD:+1500 },
-    { name:"14K 금시세",  unit:"1돈",  sell:null,                 buy:442000,  buyD:+1200 },
-    { name:"백금 시세",   unit:"1돈",  sell:200000,  sellD:0,     buy:180000,  buyD:0 },
-    { name:"은 시세",     unit:"1kg",  sell:3650000, sellD:-5000, buy:3050000, buyD:-4000 }
+    { name:"골드바 (9999)", unit:"1돈",  sell:null,                 buy:772000 },
+    { name:"24K 금시세",   unit:"1돈",  sell:780000,  sellD:+1000, buy:770000,  buyD:+2000 },
+    { name:"18K 금시세",   unit:"1돈",  sell:null,                 buy:570000,  buyD:+1500 },
+    { name:"14K 금시세",   unit:"1돈",  sell:null,                 buy:442000,  buyD:+1200 },
+    { name:"백금 시세",    unit:"1돈",  sell:200000,  sellD:0,     buy:180000,  buyD:0 },
+    { name:"은 시세",      unit:"1kg",  sell:3650000, sellD:-5000, buy:3050000, buyD:-4000 }
   ],
 
   // 아래 매입가 표
+  // 🔴 "from" 이 붙은 5줄은 위 시세표 「내가 팔 때」 에서 저절로 오는 값입니다 (DB 가 박습니다).
+  //    여기 예비값도 DB 와 같은 모양으로 맞춰 둡니다 — 모양이 다르면 나중에 보는 사람이 헷갈립니다.
+  // 🔴 골드바 (9999) 772,000 은 24K 매입 770,000 과 다른, 사장님이 정한 값입니다. 섞지 않습니다.
   buy: [
     { group: "순금 · GOLD" },
-    { name: "골드바 (9999)",              price: 772000, unit: "1돈" },
+    { name: "골드바 (9999)",              price: 772000, unit: "1돈", from: "골드바 (9999)" },
     { name: "검증덩이 (3대마크)",           price: 769000, unit: "1돈" },
     { name: "검인 반지 · 돌반지 · 회사메달", price: 762000, unit: "1돈" },
     { name: "검인 목걸이 · 팔찌",           price: 760000, unit: "1돈" },
 
     { group: "K금 · 치금" },
-    { name: "18K",                        price: 570000, unit: "1돈" },
-    { name: "14K",                        price: 442000, unit: "1돈" },
+    { name: "18K",                        price: 570000, unit: "1돈", from: "18K 금시세" },
+    { name: "14K",                        price: 442000, unit: "1돈", from: "14K 금시세" },
     { name: "10K",                        price: 200000, unit: "1돈" },
     { name: "치금 (인레이)",               price: 380000, unit: "1돈" },
     { name: "치금 (크라운)",               price: 280000, unit: "1돈" },
 
     { group: "백금 · 은" },
-    { name: "백금 99",                     price: 180000,  unit: "1돈" },
+    { name: "백금 99",                     price: 180000,  unit: "1돈", from: "백금 시세" },
     { name: "실버바 (999)",                price: 3000000, unit: "1kg" },
-    { name: "실버바 (9999)",               price: 3050000, unit: "1kg" }
+    { name: "실버바 (9999)",               price: 3050000, unit: "1kg", from: "은 시세" }
   ]
 };
 
@@ -1731,7 +1844,10 @@ function delta(v){
   return `<div class="d eq">－</div>`;
 }
 function cell(price, d, cls){
-  if (price === null) return `<div class="br-cell ${cls}"><div class="p txt">제품시세적용</div></div>`;
+  /* 🔴 `== null` 로 둡니다 (=== 아닙니다) — 키가 아예 빠져 undefined 로 오는 경우도
+     「제품시세적용」 으로 그려야 합니다. === null 이면 그때 won() 이 그 자리에서 터지고,
+     그 예외를 loadRates 의 catch 가 조용히 삼켜 손님이 옛 예비 시세를 보게 됩니다. */
+  if (price == null) return `<div class="br-cell ${cls}"><div class="p txt">제품시세적용</div></div>`;
   return `<div class="br-cell ${cls}"><div class="p">${won(price)}</div>${delta(d)}</div>`;
 }
 
@@ -1752,17 +1868,22 @@ function renderRates(d){
       ${cell(r.buy,  r.buyD,  "sell")}
     </div>`).join("");
 
-  document.getElementById("r-gold").textContent = won(d.hero.gold);
-  document.getElementById("r-18k").textContent  = won(d.hero.k18);
-  document.getElementById("r-14k").textContent  = won(d.hero.k14);
-  document.getElementById("r-pt").textContent   = won(d.hero.pt);
-  document.getElementById("r-ag").textContent   = won(d.hero.ag);
+  /* 🔴 2026-09-27 — 여기 있던 다섯 줄(#r-gold · #r-18k · #r-14k · #r-pt · #r-ag)을
+     히어로 칸과 **같은 편집에서** 지웠습니다.
+     칸만 지우고 이 줄을 남기면 그 자리에서 TypeError 가 나고, 그 아래 매입표 · 모바일 메뉴 ·
+     왼쪽 상품 메뉴 · loadRates 가 통째로 안 붙어 「메뉴가 안 열리는」 손님 화면이 됩니다.
+     이 파일에서 제일 쉽게 나는 사고라 여기 적어 둡니다.
+     🔴 d.hero 자체는 DB 에 그대로 남아 있습니다 (위 RATES.hero 주석 참고). */
   document.getElementById("r-updated").textContent = "UPDATED · " + d.updated;
 
+  /* 🔴 price 를 `== null` 로 봅니다 (=== 아닙니다) — 장부가 파생 줄(from 이 붙은 5줄)의 price 를
+     안 보내는 판에서는 키가 아예 없습니다. 지금 이 줄은 그때 won() 에서 터지고, 그 예외를
+     loadRates 의 catch 가 삼켜 「위 표는 새 값 · 아래 매입표는 8월 예비값」 인 반쪽 화면이
+     조용히 남습니다. */
   document.getElementById("buy-table").innerHTML = d.buy.map(r =>
     r.group
       ? `<tr class="grp"><td colspan="3">${r.group}</td></tr>`
-      : `<tr><td>${r.name}</td><td class="num buy">${won(r.price)}</td><td class="num" style="color:var(--ink-faint);font-weight:400">${r.unit}</td></tr>`
+      : `<tr><td>${r.name}</td><td class="num buy">${r.price == null ? "제품시세적용" : won(r.price)}</td><td class="num" style="color:var(--ink-faint);font-weight:400">${r.unit}</td></tr>`
   ).join("");
 }
 
@@ -1811,11 +1932,30 @@ const SUPA_KEY = "sb_publishable_vfQOB-gVznQAHNHswDy_jg_-CK6ATiZ";
 
 /* 받아온 값이 그릴 수 있는 모양인가 — 반쪽짜리면 예비 시세를 그대로 둔다 */
 function looksOk(d){
+  const num = v => v == null || typeof v === "number";   /* 숫자이거나 비어 있으면 그릴 수 있다 */
   if (!d || typeof d !== "object") return false;
+  /* 🔴 hero 다섯은 아직 검사합니다 — 화면에서는 사라졌지만 DB 에 그대로 있고,
+     GitHub Pages 가 묵힌 옛 index.html 을 받은 손님이 그 값으로 큰 숫자 다섯을 그립니다. */
   if (!d.hero || typeof d.hero !== "object") return false;
   for (const k of ["gold","k18","k14","pt","ag"]) if (typeof d.hero[k] !== "number") return false;
   if (!Array.isArray(d.live) || d.live.length === 0) return false;
   if (!Array.isArray(d.buy)  || d.buy.length  === 0) return false;
+  /* 🔴 줄 하나가 반쪽이면 그 줄에서 won() 이 터지고 표·매입표가 통째로 안 그려집니다.
+     그럴 때는 차라리 예비 시세를 그대로 두는 것이 낫습니다.
+     🔴 buy(내가 팔 때)에 null 을 허용합니다 — 비었으면 「제품시세적용」 으로 나갑니다.
+        여기서 줄을 통째로 물리면(=예비 시세로 되돌리면) 손님이 2026.08.26 옛 시세를
+        오늘 시세처럼 보게 되어 그게 더 나쁩니다. 비는 것은 장부 화면과 DB 가 막습니다. */
+  for (const r of d.live){
+    if (!r || typeof r !== "object") return false;
+    if (typeof r.name !== "string" || typeof r.unit !== "string") return false;
+    if (!num(r.sell) || !num(r.buy) || !num(r.sellD) || !num(r.buyD)) return false;
+  }
+  for (const r of d.buy){
+    if (!r || typeof r !== "object") return false;
+    if (typeof r.group === "string") continue;            /* 묶음 머리 줄 (순금 · K금 · 백금·은) */
+    if (typeof r.name !== "string" || typeof r.unit !== "string") return false;
+    if (!num(r.price)) return false;
+  }
   return true;
 }
 
@@ -1834,6 +1974,409 @@ async function loadRates(){
   }
 }
 loadRates();
+</script>
+
+<!-- ═══════════════════════════════════════════════════
+     제품 갤러리 — 화면을 덮는 한 덩이 (2026-09-27)
+
+     🔴 div.temple-bg **밖**에 둡니다 — position:fixed 라 그 안의 background-attachment:fixed 와
+        「절마다 배경 다시 깔기」 에 얽히지 않습니다.
+     🔴 여기 어떤 값(가격)도 적지 않습니다. 사장님이 못 박은 것입니다.
+     ═══════════════════════════════════════════════════ -->
+<div class="gal" id="gal" hidden>
+  <div class="galbar">
+    <button class="galback" id="galback" type="button" aria-label="돌아가기">←</button>
+    <span class="galttl" id="galttl">제품</span>
+    <a class="galtel" href="tel:01090874988">전화</a>
+  </div>
+  <div class="galtabs" id="galtabs"></div>
+  <div class="galkinds" id="galkinds" hidden></div>
+  <div class="galgrid" id="galgrid"></div>
+  <button class="galmore" id="galmore" type="button" hidden></button>
+  <!-- 🔴 「매장에 있습니다」 라고 쓰지 않습니다 — 목록은 「숨기지 않은 제품」 만 보고 재고는 안 봅니다.
+       손님이 보고 오셨는데 없으면 그 자리에서 신뢰가 깨집니다. -->
+  <p class="galnote">
+    가격은 시세에 따라 달라져 전화로 안내드립니다 · <a href="tel:01090874988">010-9087-4988</a><br>
+    사진이 준비되지 않은 제품도 있습니다 · 재고는 전화로 확인해 주세요
+  </p>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   제품 갤러리 (2026-09-27)
+
+   🔴 위 시세 script 와 **따로** 둡니다. 파일에 script 가 하나뿐이면 이 아래 문법 실수 하나가
+      시세표·메뉴까지 통째로 죽입니다. `npx tsc` 는 이 파일을 한 줄도 안 봐 주므로
+      터지는 범위를 파일 구조로 갈라 둡니다.
+   🔴 위 script 의 SUPA_URL·SUPA_KEY 를 빌려 쓰지 않습니다 — 위 script 가 그 두 줄 앞에서 터지면
+      const 가 초기화되지 않아 여기서 ReferenceError 로 같이 죽습니다.
+      (「갈라 둔다」 가 한쪽 방향만 맞으면 갈라 둔 게 아닙니다.) 그래서 열쇠를 여기 따로 적습니다.
+   🔴 열쇠는 공개용(publishable)입니다. 이 열쇠로 읽히는 것은 site_rates 한 표와
+      site_products() 함수뿐이고, 매출·손님·원가·직원은 로그인해야만 읽힙니다.
+      비밀 열쇠(sb_secret_…)는 이 파일에 절대 넣지 않습니다.
+
+   🔴🔴 사진은 site_products() 가 준 photo_url 그 한 값만 씁니다 —
+        **사진 저장소(photos 버킷)의 목록을 훑는 코드를 절대 넣지 않습니다.**
+        같은 저장소에 손님 주문서 그림(성함·전화·서명)과 매입 증빙·마감 사진이 같이 들어 있습니다.
+        그래서 아래 photoOf() 가 products/ 로 시작하는 주소만 통과시킵니다 (DB 도 같은 검사를 합니다).
+
+   🔴 SQL 105 를 아직 DB 에 안 넣었어도 이 파일은 안 깨집니다 — 갤러리에만 「준비 중입니다」 가
+      뜨고 시세·약속·오시는 길은 그대로 돕니다.
+   ═══════════════════════════════════════════════════ */
+(function(){
+  "use strict";
+
+  var G_URL = "https://odbwpyiavenrwfsjsppk.supabase.co";
+  var G_KEY = "sb_publishable_vfQOB-gVznQAHNHswDy_jg_-CK6ATiZ";
+  var TEL   = "010-9087-4988";
+  var PAGE  = 60;                      /* 한 번에 보여주는 카드 수 */
+
+  var gal      = document.getElementById("gal");
+  var galttl   = document.getElementById("galttl");
+  var galtabs  = document.getElementById("galtabs");
+  var galkinds = document.getElementById("galkinds");
+  var galgrid  = document.getElementById("galgrid");
+  var galmore  = document.getElementById("galmore");
+  var galback  = document.getElementById("galback");
+  /* 칸이 하나라도 없으면 아무 일도 하지 않는다 — 시세 쪽을 건드리지 않고 조용히 빠진다 */
+  if (!gal || !galttl || !galtabs || !galkinds || !galgrid || !galmore || !galback) return;
+
+  /* ── 글자 넣기 ──
+     🔴 제품 이름은 이 파일에서 유일하게 「사장님이 자유롭게 적은 글자」 입니다.
+        & < > " ' 를 바꿔 넣지 않으면 이름 하나로 화면이 깨집니다.
+        photo_url 도 속성에 넣으므로 같이 거칩니다 (접두사가 맞아도 뒤에 큰따옴표가 섞이면 속성을 탈출합니다). */
+  var ESC = { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" };
+  function esc(s){
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){ return ESC[c]; });
+  }
+  function up(el, sel){ return (el && el.closest) ? el.closest(sel) : null; }
+
+  /* ── 종목 (왼쪽 메뉴 세 줄) ── */
+  var CATS  = ["goldbar","puregold","karat"];
+  var CATNM = { goldbar:"골드바", puregold:"순금 쥬얼리", karat:"18K · 14K 쥬얼리" };
+  /* ── 종류 (아코디언) — 🔴 단추 순서는 사장님이 적으신 순서입니다 (기타가 돌선물보다 앞) ── */
+  var KINDS  = ["all","ring","bracelet","necklace","etc","dol"];
+  var KINDNM = { all:"전체", ring:"반지", bracelet:"팔찌", necklace:"목걸이", etc:"기타", dol:"돌선물" };
+  /* 카드에 적는 종류 — 역할 그대로 한국어로 적습니다.
+     🔴 종류 「이름」 은 DB 에서 안 나옵니다 (사장님이 「24K 골드바」 처럼 함량·협력사 사정을 섞어
+        적으시므로 여덟 글자 열거값만 나옵니다). 그래서 여기서 한국어로 바꿔 씁니다. */
+  var ROLENM = { ring:"반지", bracelet:"팔찌", necklace:"목걸이", earring:"귀걸이",
+                 goldbar:"골드바", dol:"돌선물", etc:"기타" };
+  var KARATNM = { k24:"24K", k18:"18K", k14:"14K" };
+
+  /* 주소 규칙 — 여기 안 걸리는 해시(#top · #rates · #promise · #visit)는 예전처럼 그냥 동작한다 */
+  var RE = /^#gallery-(goldbar|puregold|karat)(?:\/(all|ring|bracelet|necklace|dol|etc))?$/;
+
+  var items = null;      /* 받아온 제품 배열 (null = 아직 안 받음) */
+  var state = "idle";    /* idle | loading | ready | fail | none */
+  var cat = "goldbar", kind = "all", shown = PAGE;
+  var savedY = 0;        /* 갤러리를 열기 전 스크롤 자리 */
+  var navigated = false; /* 이 페이지에서 해시가 한 번이라도 바뀌었나 */
+  var notice = "";       /* 「그 종목은 준비 중입니다」 같은 한 줄 안내 */
+
+  /* ── 종목 고르기 — 위에서 먼저 걸리는 곳으로. 어디에도 안 걸리는 제품이 없다 ── */
+  function catOf(p){
+    if (p.karat === "k18" || p.karat === "k14") return "karat";
+    if (p.role === "goldbar") return "goldbar";
+    return "puregold";
+  }
+  /* ── 종류 고르기 — 🔴 「기타」 는 화이트리스트가 아니라 「나머지 전부」 다 (모르는 값도 여기로) ── */
+  function kindOf(p){
+    var r = p.role;
+    return (r === "ring" || r === "bracelet" || r === "necklace" || r === "dol") ? r : "etc";
+  }
+  /* 🔴 사진 주소를 홈페이지에서 한 번 더 검사합니다 (DB 도 같은 접두사로 걸러 줍니다 — 양쪽에서 봅니다).
+     products/ 아래가 아닌 주소는 안 씁니다 : javascript: · data: · 남의 주소를 막고,
+     같은 저장소의 손님 주문서 그림이 실려 오는 길을 끊습니다. */
+  function photoOf(u){
+    return (typeof u === "string" &&
+            /^https:\/\/[A-Za-z0-9.-]+\/storage\/v1\/object\/public\/photos\/products\//.test(u))
+           ? u : null;
+  }
+  function countIn(c){
+    if (!items) return 0;
+    var n = 0;
+    for (var i = 0; i < items.length; i++) if (catOf(items[i]) === c) n++;
+    return n;
+  }
+
+  /* ── 지금 보여줄 목록 ── */
+  function pick(){
+    if (!items) return [];
+    var withPhoto = [], noPhoto = [];
+    for (var i = 0; i < items.length; i++){
+      var p = items[i];
+      if (catOf(p) !== cat) continue;
+      if (kind !== "all" && kindOf(p) !== kind) continue;
+      (p._ph ? withPhoto : noPhoto).push(p);
+    }
+    /* 🔴 사진 있는 것을 여기서 다시 앞으로 모읍니다. DB 의 정렬은 가공 전 photo_url 을 보므로,
+       products/ 가 아닌 주소를 가진 제품이 「사진 있는 쪽」 에 줄을 서 버립니다. 그러면 아래
+       「아래는 사진 준비 중인 제품입니다」 구분 줄이 엉뚱한 자리에 옵니다. */
+    return withPhoto.concat(noPhoto);
+  }
+
+  /* ── 그리기 ── */
+  function cardHtml(p){
+    var kr = KARATNM[p.karat] || "";
+    var kn = ROLENM[p.role] || "기타";
+    return '<div class="gcard' + (p._ph ? '' : ' nophoto') + '">'
+         +   '<div class="gph">'
+         +     (kr ? '<span class="gk">' + esc(kr) + '</span>' : '')
+         +     (p._ph ? '<img src="' + esc(p._ph) + '" alt="' + esc(p.name)
+                        + '" loading="lazy" decoding="async">' : '')
+         +   '</div>'
+         +   '<div class="gkind">' + esc(kn) + '</div>'
+         +   '<div class="gnm">' + esc(p.name) + '</div>'
+         +   '<span class="gask">가격문의</span>'
+         + '</div>';
+  }
+  function msg(html){
+    galmore.hidden = true;
+    galgrid.innerHTML = '<div class="galmsg">' + html + '</div>';
+  }
+  var TELHTML = '<a href="tel:01090874988">' + TEL + '</a>';
+
+  function drawTabs(){
+    if (!items || !items.length){ galtabs.innerHTML = ""; return; }
+    var html = "";
+    for (var i = 0; i < CATS.length; i++){
+      var c = CATS[i];
+      if (countIn(c) === 0) continue;        /* 🔴 제품이 0개인 종목 단추는 안 그린다 */
+      html += '<button type="button" data-cat="' + c + '"' + (c === cat ? ' class="on"' : '')
+            + '>' + esc(CATNM[c]) + '</button>';
+    }
+    galtabs.innerHTML = html;
+  }
+
+  function drawKinds(){
+    galkinds.classList.remove("open");
+    if (!items || !items.length){ galkinds.hidden = true; galkinds.innerHTML = ""; return; }
+    var have = {}, n = 0;
+    for (var i = 0; i < items.length; i++){
+      var p = items[i];
+      if (catOf(p) === cat){ have[kindOf(p)] = true; n++; }
+    }
+    var ks = [];
+    for (var j = 0; j < KINDS.length; j++){
+      var k = KINDS[j];
+      if (k === "all" ? n > 0 : have[k]) ks.push(k);
+    }
+    /* 🔴 「전체」 말고 남는 칸이 하나뿐이면 아코디언 줄 자체를 숨기고 바로 격자를 보여줍니다.
+       골드바 종목은 거의 전부 role='goldbar' 라 「전체 | 기타」 두 칸의 목록이 글자까지 똑같아집니다.
+       (「남는 칸이 전체 하나뿐이면」 으로 적으면 이 조건은 영원히 성립하지 않습니다 —
+        「기타 = 나머지 전부」 라서 늘 한 칸이 남습니다.) */
+    if (ks.length <= 2){ galkinds.hidden = true; galkinds.innerHTML = ""; return; }
+    var html = '<button class="kh" type="button">종류 · ' + esc(KINDNM[kind] || "전체") + ' ▾</button>'
+             + '<div class="kl">';
+    for (var m = 0; m < ks.length; m++){
+      html += '<button type="button" data-kind="' + ks[m] + '"' + (ks[m] === kind ? ' class="on"' : '')
+            + '>' + esc(KINDNM[ks[m]]) + '</button>';
+    }
+    galkinds.innerHTML = html + '</div>';
+    galkinds.hidden = false;
+  }
+
+  function drawGrid(){
+    galmore.hidden = true;
+    if (state === "idle" || state === "loading"){ msg("제품을 불러오는 중…"); return; }
+    if (state === "fail"){
+      msg("제품을 불러오지 못했습니다 · 전화로 문의해 주세요<br>" + TELHTML
+          + '<br><button type="button" id="galretry">다시 시도</button>');
+      return;
+    }
+    /* 🔴 「준비 중입니다」 는 자료가 도착한 뒤에만 씁니다 — 도착 전에 그리면 거짓말이 됩니다 */
+    if (state === "none"){
+      msg("제품을 준비 중입니다 · 전화로 문의해 주세요<br>" + TELHTML);
+      return;
+    }
+    var list = pick();
+    if (!list.length){ msg(esc(notice || "준비 중입니다") + " · 전화로 문의해 주세요<br>" + TELHTML); return; }
+
+    var html = notice ? '<div class="galsep">' + esc(notice) + '</div>' : "";
+    var anyPhoto = false, sepDone = false;
+    var end = Math.min(shown, list.length);
+    for (var i = 0; i < end; i++){
+      var p = list[i];
+      if (p._ph) anyPhoto = true;
+      else if (anyPhoto && !sepDone){
+        sepDone = true;
+        html += '<div class="galsep">아래는 사진 준비 중인 제품입니다</div>';
+      }
+      html += cardHtml(p);
+    }
+    galgrid.innerHTML = html;
+    /* 🔴 onerror 를 속성에 적지 않고 여기서 답니다 — 이름·주소에 따옴표가 섞여도 안전합니다 */
+    var imgs = galgrid.querySelectorAll(".gcard img");
+    for (var j = 0; j < imgs.length; j++){
+      imgs[j].addEventListener("error", function(){
+        var c = up(this, ".gcard");
+        if (c) c.classList.add("nophoto");
+      });
+    }
+    var left = list.length - end;
+    galmore.hidden = left <= 0;
+    if (left > 0) galmore.textContent = "더 보기 (남은 " + left + "개)";
+  }
+
+  function render(){
+    drawTabs();
+    drawKinds();
+    galttl.textContent = CATNM[cat] + (kind !== "all" ? " · " + KINDNM[kind] : "");
+    drawGrid();
+  }
+
+  /* 주소가 가리키는 종목·종류에 제품이 없을 때 고쳐 준다 */
+  function fixCat(){
+    notice = "";
+    if (!items || !items.length) return;
+    if (countIn(cat) === 0){
+      var alt = null;
+      for (var i = 0; i < CATS.length; i++) if (countIn(CATS[i]) > 0){ alt = CATS[i]; break; }
+      if (alt){
+        /* 🔴 조사(는·를) 앞에 띄어쓰기를 두지 않습니다 — 손님 화면에 「골드바 는 준비 중입니다」 로
+           나가면 가게가 글을 못 쓰는 것처럼 보입니다. 종목 이름 세 개(골드바 · 순금 쥬얼리 ·
+           18K · 14K 쥬얼리)가 모두 모음으로 끝나므로 는·를 이 맞습니다 — 이름을 늘릴 때는
+           받침으로 끝나는 이름이면 은·을 이 되어야 하니 그때 이 줄을 같이 봅니다. */
+        notice = CATNM[cat] + "는 준비 중입니다 — " + CATNM[alt] + "를 보여드립니다";
+        cat = alt; kind = "all"; shown = PAGE;
+        history.replaceState(null, "", "#gallery-" + cat);
+      }
+      return;
+    }
+    if (kind !== "all"){
+      var found = false;
+      for (var j = 0; j < items.length; j++){
+        var p = items[j];
+        if (catOf(p) === cat && kindOf(p) === kind){ found = true; break; }
+      }
+      if (!found){                                  /* 🔴 제품이 0개인 종류로 들어오면 「전체」 로 돌린다 */
+        kind = "all"; shown = PAGE;
+        history.replaceState(null, "", "#gallery-" + cat);
+      }
+    }
+  }
+
+  /* ── 받기 — 갤러리를 처음 열 때 한 번만 ──
+     🔴 sessionStorage 에 담아 두지 않습니다 — 이름에 손님 정보가 들어간 것을 발견해 숨겨도
+        캐시가 남는 동안 계속 보입니다. 홈만 보는 손님은 이 호출이 아예 없습니다. */
+  function load(){
+    if (state === "loading" || state === "ready" || state === "none") return;
+    state = "loading";
+    drawGrid();
+    fetch(G_URL + "/rest/v1/rpc/site_products",
+          { headers: { apikey: G_KEY, Authorization: "Bearer " + G_KEY }, cache: "no-store" })
+      .then(function(r){
+        /* 🔴 404 = SQL 105 를 아직 안 넣었다. 「다시 시도」 를 눌러도 달라지지 않으므로
+           「준비 중입니다」 로 끝냅니다 — 「못 받았습니다」 는 손님에게 틀린 말이 됩니다. */
+        if (r.status === 404){ state = "none"; return null; }
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      })
+      .then(function(rows){
+        if (state === "none"){ render(); return; }
+        if (!Array.isArray(rows)) throw new Error("모양이 이상합니다");
+        items = [];
+        for (var i = 0; i < rows.length; i++){
+          var p = rows[i];
+          if (!p || typeof p.name !== "string") continue;
+          p._ph = photoOf(p.photo_url);
+          items.push(p);
+        }
+        state = items.length ? "ready" : "none";
+        fixCat();
+        render();
+      })
+      .catch(function(){ state = "fail"; drawGrid(); });
+  }
+
+  /* ── 여닫기 ── */
+  function openGal(){
+    gal.hidden = false;
+    document.documentElement.classList.add("gal-open");
+    load();
+  }
+  function closeGal(){
+    gal.hidden = true;
+    document.documentElement.classList.remove("gal-open");
+    /* 🔴 html{scroll-behavior:smooth} 때문에 그냥 scrollTo 하면 스르륵 움직입니다 —
+       그 순간만 auto 로 두고 곧 되돌립니다. */
+    var h = document.documentElement, old = h.style.scrollBehavior;
+    h.style.scrollBehavior = "auto";
+    window.scrollTo(0, savedY);
+    h.style.scrollBehavior = old;
+  }
+  function goBack(){
+    /* 해시로 들어와 히스토리가 한 칸이라도 쌓였으면 브라우저에게 맡긴다 (hashchange 가 닫는다) */
+    if (navigated){ history.back(); return; }
+    /* 갤러리 주소로 바로 들어온 손님 — 되돌릴 칸이 없으므로 주소만 지우고 직접 닫는다 */
+    history.replaceState(null, "", location.pathname + location.search);
+    closeGal();
+  }
+
+  /* ── 주소 읽기 ── */
+  function route(){
+    var m = RE.exec(location.hash);
+    if (!m){
+      if (!gal.hidden) closeGal();       /* 🔴 열려 있지 않으면 스크롤을 건드리지 않는다 */
+      return;
+    }
+    var wasOpen = !gal.hidden;
+    cat = m[1];
+    kind = m[2] || "all";
+    shown = PAGE;                        /* 🔴 종목·종류가 바뀌면 보여준 개수를 처음(60)으로 */
+    notice = "";
+    if (!wasOpen) openGal();
+    if (items) fixCat();
+    render();
+    gal.scrollTop = 0;
+  }
+
+  /* 🔴 savedY 는 **링크를 누르는 순간**에 적습니다 — openGal 안에서 읽으면,
+     #gallery-… 라는 id 가 문서에 없어 브라우저가 맨 위로 스크롤한 뒤 hashchange 가 나는 경우
+     0 이 되어 갤러리를 닫았을 때 손님이 맨 위로 튕깁니다. (capture 단계라 다른 handler 보다 먼저 돕니다.) */
+  document.addEventListener("click", function(e){
+    if (!up(e.target, 'a[href^="#gallery-"]')) return;
+    if (gal.hidden) savedY = window.scrollY || window.pageYOffset || 0;
+  }, true);
+
+  galtabs.addEventListener("click", function(e){
+    var b = up(e.target, "button[data-cat]");
+    if (!b) return;
+    var c = b.getAttribute("data-cat");
+    if (c === cat) return;
+    cat = c; kind = "all"; shown = PAGE; notice = "";
+    /* 종목은 히스토리를 한 칸 쌓는다 — 뒤로가기가 「한 단계 위」 로 느껴지게 */
+    history.pushState(null, "", "#gallery-" + cat);
+    navigated = true;
+    render();
+    gal.scrollTop = 0;                   /* 🔴 60장 내려보다 종목을 바꾸면 빈 여백부터 보인다 */
+  });
+
+  galkinds.addEventListener("click", function(e){
+    if (up(e.target, ".kh")){ galkinds.classList.toggle("open"); return; }
+    var b = up(e.target, "button[data-kind]");
+    if (!b) return;
+    kind = b.getAttribute("data-kind");
+    shown = PAGE;
+    /* 🔴 종류는 히스토리를 쌓지 않는다 — 여섯 번 누른 손님이 뒤로가기를 여섯 번 누르지 않게 */
+    history.replaceState(null, "", "#gallery-" + cat + (kind === "all" ? "" : "/" + kind));
+    render();
+    gal.scrollTop = 0;
+  });
+
+  galgrid.addEventListener("click", function(e){
+    if (e.target && e.target.id === "galretry"){ state = "idle"; load(); }
+  });
+  galmore.addEventListener("click", function(){ shown += PAGE; drawGrid(); });
+  galback.addEventListener("click", goBack);
+  document.addEventListener("keydown", function(e){
+    if (e.key === "Escape" && !gal.hidden) goBack();
+  });
+
+  window.addEventListener("hashchange", function(){ navigated = true; route(); });
+  route();          /* 갤러리 주소로 바로 들어온 손님용 — 안 걸리면 아무 일도 안 한다 */
+})();
 </script>
 
 </body>
